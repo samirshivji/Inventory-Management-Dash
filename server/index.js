@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import connectDB from './database/connections.js';
-import authRoutes from '../routes/auth.js'
+import authRoutes from './routes/auth.js';
 
 
 
@@ -13,7 +13,7 @@ app.use('/api/auth', authRoutes);
 
 app.listen(process.env.PORT, () => {
     connectDB();
-    console.log("Server is running on http://localhost:3000");
+    console.log("Server is running on http://localhost:5000");
 }
 )
 

@@ -1,7 +1,44 @@
-import React from "react";
-
+import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router";
+import axios from "axios";
 
 const Login = () => {
+
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const {login} = useAuth();
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await axios.post("http://localhost:5000/api/auth/login", {
+                email, password});
+
+            if (response.data.status){
+                await login(response.data.user, response.data.token);
+                if(response.data.user.role === "admin") {
+                    navigate("/admin/dashboard");
+                }else{
+                    navigate("/customer/dashboard");
+                }
+            }else {
+                alert(response.data.error);
+            }
+        }catch (error){
+            console.log(error);
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const styles = {
         header: {
         fontSize: "35px",
@@ -61,7 +98,12 @@ const Login = () => {
     return (
         <div style={styles.container}>
             <h1 style={styles.header}>Bruno's Luxx LLC</h1>
-            <form style={styles.form}>
+            {error && (
+                <div className="bg-red-500 text-white p-2 mb-5 rounded">
+                    {error}
+                    </div>
+            )}
+            <form style={styles.form} onSubmit={handleSubmit}>
                 <div>
                     <label htmlFor="email" style={styles.label}>
                         Email
@@ -70,6 +112,7 @@ const Login = () => {
                         type="text"
                         id="email"
                         name="email"
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                         style={styles.input}
                     />
@@ -83,13 +126,16 @@ const Login = () => {
                         type="password"
                         id="password"
                         name="password"
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                         style={styles.input}
                     />
                 </div>
 
-                <button type="submit" style={styles.button}>
-                    Login
+                <button 
+                type="submit" 
+                style={styles.button}>
+                {loading ? "Loading..." : "Login"}
                 </button>
             </form>
         </div>
